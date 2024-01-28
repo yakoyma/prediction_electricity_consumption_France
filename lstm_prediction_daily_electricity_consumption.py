@@ -44,8 +44,10 @@ print('TensorFlow: {}'.format(tf.__version__))
 print('KerasTuner: {}'.format(keras_tuner.__version__))
 
 
-# Constant
+# Constants
 SEED = 0
+BATCH_SIZE = 32
+EPOCHS = 150
 
 # Set the random seed for reproducibility
 random.seed(SEED)
@@ -218,21 +220,38 @@ early_stopping_callback = EarlyStopping(
     verbose=0,
     patience=5)
 
-# Train and find the best model
+# Search the best hyperparameters of the model
 tuner.search(
     x=X_train,
     y=y_train,
-    epochs=100,
-    batch_size=32,
+    epochs=EPOCHS,
+    batch_size=BATCH_SIZE,
     validation_split=0.2,
     callbacks=[early_stopping_callback])
 
-# Get the best model with optimised hyperparameters
-model = tuner.get_best_models(num_models=1)[0]
+# Get the best hyperparameters
 print('\n\nOptimal hyperparameters:')
 print(tuner.get_best_hyperparameters()[0].values)
-print('\nSummary of the best model with optimised hyperparameters:')
+
+# Build the model with the optimal hyperparameters
+model = tuner.hypermodel.build(tuner.get_best_hyperparameters()[0])
+
+# Train the model
+model_history = model.fit(
+    X_train,
+    y_train,
+    batch_size=BATCH_SIZE,
+    epochs=EPOCHS,
+    validation_split=0.2,
+    callbacks=[early_stopping_callback],
+    verbose=1)
+
+print('\nSummary of the model with optimised hyperparameters:')
 print(model.summary())
+
+# Display the history of the model
+display_tensorflow_history(
+    model_history, 'mean_squared_error', 'mean_squared_error')
 
 # Make predictions
 y_pred = model.predict(X_test)

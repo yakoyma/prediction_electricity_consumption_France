@@ -12,7 +12,7 @@ import matplotlib.pyplot as plt
 import pandas as pd
 
 from tensorflow.keras.models import Sequential
-from tensorflow.keras.layers import Input, Dense, Dropout, LSTM
+from tensorflow.keras.layers import Dense, Dropout, LSTM
 from sktime.performance_metrics import forecasting
 from sklearn import metrics
 
@@ -58,7 +58,6 @@ def build_dnn_model(hp):
            The optimised model.
     """
     model = Sequential()
-    model.add(Input(shape=31))
     model.add(Dense(
         hp.Int('units', min_value=64, max_value=1024, step=32),
         hp.Choice('activation', values=['elu', 'relu', 'tanh'])))
@@ -100,8 +99,12 @@ def build_lstm_model(hp):
     model.add(LSTM(
         hp.Int('units', 10, 1024),
         hp.Choice('activation', values=['elu', 'relu', 'tanh']),
-        return_sequences=True,
-        input_shape=(31, 1)))
+        return_sequences=True))
+    model.add(Dropout(hp.Choice('dropout', values=[0.1, 0.2, 0.3, 0.4, 0.5])))
+    model.add(LSTM(
+        hp.Int('units', 10, 1024),
+        hp.Choice('activation', values=['elu', 'relu', 'tanh']),
+        return_sequences=True))
     model.add(Dropout(hp.Choice('dropout', values=[0.1, 0.2, 0.3, 0.4, 0.5])))
     model.add(LSTM(
         hp.Int('units', 10, 1024),
@@ -115,6 +118,57 @@ def build_lstm_model(hp):
         optimizer=hp.Choice('optimizer', values=['adam', 'rmsprop']),
         metrics=['mean_squared_error', 'mean_absolute_error'])
     return model
+
+
+def display_tensorflow_history(model_history, loss, metric):
+    """
+    This function plots training loss and training scores, training and
+    validation scores, and training and validation losses based on
+    the history of a TensorFlow model.
+
+    Parameters
+    ----------
+    - model_history: tf.keras.callbacks.History
+                     The history of the model.
+    - loss: str
+            The name of the optimisation metric.
+    - metric: str
+              The name of the evaluation metric.
+    """
+    score = model_history.history[metric]
+    val_score = model_history.history['val_' + metric]
+    loss_score = model_history.history['loss']
+    val_loss = model_history.history['val_loss']
+
+    # Plot training loss and training score
+    plt.figure(figsize=(8, 5))
+    plt.plot(loss_score, color='tab:blue')
+    plt.plot(score, color='tab:red')
+    plt.title('History of the model training')
+    plt.xlabel('Epoch')
+    plt.ylabel('Score')
+    plt.legend([loss, metric], loc='best')
+    plt.show()
+
+    # Plot training and validation scores
+    plt.figure(figsize=(8, 5))
+    plt.plot(score, label='Training ' + metric, color='tab:blue')
+    plt.plot(val_score, label='Validation ' + metric, color='tab:red')
+    plt.xlabel('Epoch')
+    plt.ylabel(metric)
+    plt.title(f'Training and Validation {metric.capitalize()}')
+    plt.legend(loc='best')
+    plt.show()
+
+    # Plot training and validation losses
+    plt.figure(figsize=(8, 5))
+    plt.plot(loss_score, label='Training ' + loss, color='tab:blue')
+    plt.plot(val_loss, label='Validation ' + loss, color='tab:red')
+    plt.xlabel('Epoch')
+    plt.ylabel(loss)
+    plt.title(f'Training and Validation {loss.capitalize()}')
+    plt.legend(loc='best')
+    plt.show()
 
 
 def display_sklearn_metrics(y_test, y_pred, SEED):
