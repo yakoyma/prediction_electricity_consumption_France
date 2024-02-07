@@ -36,11 +36,13 @@ import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
 import seaborn as sns
+import ydata_profiling
 import statsmodels
 import pmdarima as pm
 import sktime
 import pycaret
 
+from ydata_profiling import ProfileReport
 from statsmodels.tsa.arima_process import ArmaProcess
 from statsmodels.tsa.stattools import acf
 from pmdarima.arima.utils import ndiffs
@@ -70,6 +72,7 @@ from functions import *
 print('\nPython: {}'.format(platform.python_version()))
 print('Pandas: {}'.format(pd.__version__))
 print('Seaborn: {}'.format(sns.__version__))
+print('YData-profiling: {}'.format(ydata_profiling.__version__))
 print('Statsmodels: {}'.format(statsmodels.__version__))
 print('Pmdarima: {}'.format(pm.__version__))
 print('Sktime: {}'.format(sktime.__version__))
@@ -142,6 +145,10 @@ print(dataset.info())
 
 # Display head and the tail of the dataset
 print(pd.concat([dataset.head(), dataset.tail()]))
+
+# Time Series Profiling Report
+profile = ProfileReport(df=dataset, tsmode=True, title='Profiling Report')
+profile.to_file('dataset_report.html')
 
 # Display the monthly consumption of electricity in France
 fig, ax = plt.subplots(figsize=(12, 6))
