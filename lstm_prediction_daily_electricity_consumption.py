@@ -22,13 +22,11 @@ import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
 import seaborn as sns
-import ydata_profiling
 import sklearn
 import sktime
 import tensorflow as tf
 import keras_tuner
 
-from ydata_profiling import ProfileReport
 from sklearn.preprocessing import MinMaxScaler
 from sktime.utils.plotting import plot_series
 from sktime.transformations.series.lag import Lag
@@ -40,7 +38,6 @@ from functions import *
 print('\nPython: {}'.format(platform.python_version()))
 print('Pandas: {}'.format(pd.__version__))
 print('Seaborn: {}'.format(sns.__version__))
-print('YData-profiling: {}'.format(ydata_profiling.__version__))
 print('Scikit-learn: {}'.format(sklearn.__version__))
 print('Sktime: {}'.format(sktime.__version__))
 print('TensorFlow: {}'.format(tf.__version__))
@@ -111,10 +108,6 @@ print(dataset.info())
 
 # Display head and the tail of the dataset
 print(pd.concat([dataset.head(), dataset.tail()]))
-
-# Time Series Profiling Report
-profile = ProfileReport(df=dataset, tsmode=True, title='Profiling Report')
-profile.to_file('dataset_report.html')
 
 # Display the daily consumption of electricity in France
 fig, ax = plt.subplots(figsize=(12, 6))
