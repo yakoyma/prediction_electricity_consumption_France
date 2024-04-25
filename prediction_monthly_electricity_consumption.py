@@ -33,6 +33,7 @@ warnings.filterwarnings('ignore')
 
 # Other libraries
 import numpy as np
+import matplotlib
 import matplotlib.pyplot as plt
 import pandas as pd
 import seaborn as sns
@@ -70,6 +71,8 @@ from functions import *
 
 # Display versions of platforms and packages
 print('\nPython: {}'.format(platform.python_version()))
+print('NumPy: {}'.format(np.__version__))
+print('Matplotlib: {}'.format(matplotlib.__version__))
 print('Pandas: {}'.format(pd.__version__))
 print('Seaborn: {}'.format(sns.__version__))
 print('YData-profiling: {}'.format(ydata_profiling.__version__))
@@ -112,25 +115,20 @@ print('\n\nDimensions of the dataset: {}'.format(raw_dataset.shape))
 print('\nInformation about the dataset:')
 print(raw_dataset.info())
 
-# Display the head and the tail of the dataset
-print(pd.concat([raw_dataset.head(), raw_dataset.tail()]))
-
 # Description of the dataset
 print('\nDescription of the dataset:')
 print(round(raw_dataset.describe(include='all'), 0))
 
-# The completion rate of the dataset
-print(f'\nCompletion rate:\n{raw_dataset.count() / len(raw_dataset)*100}')
+# Display the head and the tail of the dataset
+print(pd.concat([raw_dataset.head(), raw_dataset.tail()]))
 
-# Missing rate of the dataset
-print(f'\nMissing rate:\n{raw_dataset.isna().mean() * 100}')
+# Time Series raw dataset report
+profile = ProfileReport(
+    df=raw_dataset, tsmode=True, title='Raw dataset report')
+profile.to_file('raw_dataset_report.html')
 
 # Cleanse the dataset
 dataset = raw_dataset.copy()
-
-# Check for duplicated data
-print(f'\nNumber of duplicated data: {dataset[dataset.duplicated()].shape[0]}')
-
 dataset = dataset[['Date', 'Consommation (GWh)']].rename(
     columns={'Consommation (GWh)': 'Consumption'})
 dataset['Date'] = pd.to_datetime(dataset['Date'])
@@ -139,15 +137,22 @@ dataset = dataset.sort_values(
 dataset.index = pd.PeriodIndex(dataset.index, freq='M')
 dataset = dataset[['Consumption']]
 
+# Display the dataset's dimensions
+print('\nDimensions of the dataset: {}'.format(dataset.shape))
+
 # Display the dataset's information
 print('\nInformation about the dataset:')
 print(dataset.info())
 
+# Description of the dataset
+print('\nDescription of the dataset:')
+print(round(dataset.describe(include='all'), 0))
+
 # Display head and the tail of the dataset
 print(pd.concat([dataset.head(), dataset.tail()]))
 
-# Time Series Profiling Report
-profile = ProfileReport(df=dataset, tsmode=True, title='Profiling Report')
+# Time Series dataset report
+profile = ProfileReport(df=dataset, tsmode=True, title='Dataset report')
 profile.to_file('dataset_report.html')
 
 # Display the monthly consumption of electricity in France
@@ -180,6 +185,14 @@ print(pd.concat([train_set.head(), train_set.tail()]))
 print(f'\nTest set shape: {test_set.shape}')
 print(pd.concat([test_set.head(), test_set.tail()]))
 
+# Time Series train set report
+profile = ProfileReport(df=train_set, tsmode=True, title='Train set report')
+profile.to_file('train_set_report.html')
+
+# Time Series test set report
+profile = ProfileReport(df=test_set, tsmode=True, title='Test set report')
+profile.to_file('test_set_report.html')
+
 # Display training and test targets
 fig, ax = plt.subplots(figsize=(12, 6))
 plot_series(
@@ -206,8 +219,23 @@ plt.show()
 X = Lag([i for i in range(SP + 1)]).fit_transform(dataset).dropna()
 X = X.rename(columns={'lag_0__Consumption': 'Target'})
 
+# Display the dataset's dimensions
+print('\nDimensions of the dataset: {}'.format(X.shape))
+
+# Display the dataset's information
+print('\nInformation about the dataset:')
+print(X.info())
+
+# Description of the dataset
+print('\nDescription of the dataset:')
+print(round(X.describe(include='all'), 0))
+
 # Display head and the tail of the dataset
 print(pd.concat([X.head(), X.tail()]))
+
+# Time Series X dataset report
+profile = ProfileReport(df=X, tsmode=True, title='X dataset report')
+profile.to_file('X_dataset_report.html')
 
 # Display the target
 fig, ax = plt.subplots(figsize=(12, 6))
@@ -231,6 +259,14 @@ print(f'\nTraining set shape: {X_train.shape}')
 print(pd.concat([X_train.head(), X_train.tail()]))
 print(f'\nTest set shape: {X_test.shape}')
 print(pd.concat([X_test.head(), X_test.tail()]))
+
+# Time Series X_train report
+profile = ProfileReport(df=X_train, tsmode=True, title='X_train report')
+profile.to_file('X_train_report.html')
+
+# Time Series X_test report
+profile = ProfileReport(df=X_test, tsmode=True, title='X_test report')
+profile.to_file('X_test_report.html')
 
 # Display training and test targets
 fig, ax = plt.subplots(figsize=(12, 6))
